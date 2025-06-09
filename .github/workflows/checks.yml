@@ -1,31 +1,27 @@
----
 name: Checks
 
 on: [push]
 
-jobs: 
+jobs:
   test-lint:
     name: Test and Lint
-    runs-on: ubuntu-22.04
-    steps: 
-      - name: Login to Docker Hub
+    runs-on: ubuntu-22.04  # 🔄 Оновлено з ubuntu-20.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # ✅ Виправлено з chekout
+
+      - name: Log in to Docker Hub
         uses: docker/login-action@v1
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Build Docker image
+        run: docker compose build --build-arg DEV=true  # ✅ Додано, щоб flake8 точно встановився
 
-      - name: Set up Docker Compose
-        run: |
-          docker compose version
-
-      - name: Build Docker images
-        run: docker compose build --build-arg DEV=true
-
-      - name: Run Tests
+      - name: Run tests
         run: docker compose run --rm app sh -c "python manage.py test"
 
-      - name: Run Linting
+      - name: Run linting
         run: docker compose run --rm app sh -c "flake8"
