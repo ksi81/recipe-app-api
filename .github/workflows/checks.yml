@@ -13,9 +13,19 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USER }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+
       - name: Checkout
-        uses: actions/chekout@v2
-      - name: Test
-        uses: docker compose run --rm app sh -c "python manage.py test"
-      - name: Lint
-        uses: docker compose rum --rm app sh -c "flake8"
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Compose
+        run: |
+          docker compose version
+
+      - name: Build Docker images
+        run: docker compose build --build-arg DEV=true
+
+      - name: Run Tests
+        run: docker compose run --rm app sh -c "python manage.py test"
+
+      - name: Run Linting
+        run: docker compose run --rm app sh -c "flake8"
